@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Perfume — Luxescent</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body{font-family:Poppins,system-ui,-apple-system,"Segoe UI",Roboto,Arial;margin:0;background:linear-gradient(180deg,#f3eef9,#f7f4fb);color:#1f1730}
+    .container{max-width:1100px;margin:0 auto;padding:36px}
+    .img-cover{width:100%;height:420px;object-fit:cover;border-radius:12px;box-shadow:0 10px 40px rgba(59,43,91,0.04);}
+    .lav-btn{background:linear-gradient(90deg,#C6A9FF,#6C2FCC);color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;}
+    .muted{color:#6B587A;}
+    .variant-card{background:#fff;border-radius:12px;box-shadow:0 8px 18px rgba(38,24,58,0.04);padding:10px;cursor:pointer;}
+    .back-link{font-weight:700;color:#2b2440;margin-bottom:6px;display:inline-block;}
+    @media (max-width:900px){ .img-cover{height:280px} .container{padding:18px} .product-grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div>
+        <a href="index.html" class="back-link">← Back to shop</a>
+        <div class="muted">Signature of Luxury</div>
+      </div>
+      <div>
+        Cart: <span id="cartCount" style="display:inline-block;background:#fff;color:#6C2FCC;border-radius:50%;width:28px;height:28px;text-align:center;line-height:28px;font-weight:700">0</span>
+      </div>
+    </div>
+
+    <div id="productWrap" class="product-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;">
+      <div id="productImage"></div>
+      <div id="productMeta"></div>
+    </div>
+
+    <section style="margin-top:28px;">
+      <h3 style="font-size:18px;font-weight:800">Variants</h3>
+      <p class="muted">Other options from this collection</p>
+      <div id="variantsGrid" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;"></div>
+    </section>
+
+    <section style="margin-top:28px;">
+      <h3 style="font-size:18px;font-weight:800">Notes & Ingredients</h3>
+      <p class="muted" id="notesText">Loading...</p>
+    </section>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+  (function(){
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0W_5yoSOfXHQdLdVThVvnTZtfYo2ZjEc",
+      authDomain: "client-web-2e353.firebaseapp.com",
+      databaseURL: "https://client-web-2e353-default-rtdb.firebaseio.com/",
+      projectId: "client-web-2e353",
+      storageBucket: "client-web-2e353.firebasestorage.app",
+      messagingSenderId: "368997581275",
+      appId: "1:368997581275:web:b0a8724bea87d7defc27fe"
+    };
+    try { firebase.initializeApp(firebaseConfig); } catch(e){}
+    const auth = firebase.auth(); const db = firebase.database();
+
+    const data = {
+      male:[
+        {title:'Midnight Steel', img:'https://images.unsplash.com/photo-1541462608141-9b6b2d3b10f7?q=80&w=1600&auto=format&fit=crop', price:90, id:'midnight-steel', notes:'Top: bergamot, orange. Heart: incense, leather. Base: oud, amber.'},
+        {title:'Urban Storm', img:'https://images.unsplash.com/photo-1547454013-1f1f8e5a3b7f?q=80&w=1600&auto=format&fit=crop', price:82, id:'urban-storm', notes:'Fresh green accord with spicy heart and musky base.'},
+        {title:'Royal Oud', img:'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop', price:95, id:'royal-oud', notes:'Rich oud with golden amber and saffron.'}
+      ],
+      female:[
+        {title:'Velvet Rose', img:'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1600&auto=format&fit=crop', price:88, id:'velvet-rose', notes:'Rose, peony, soft musk.'},
+        {title:'Blossom Day', img:'https://images.unsplash.com/photo-1546328130-6b0b7b4d8b24?q=80&w=1600&auto=format&fit=crop', price:70, id:'blossom-day', notes:'Citrus top with jasmine heart and dry amber.'},
+        {title:'Crimson Bloom', img:'https://images.unsplash.com/photo-1513709630908-9f6f8e3a4eac?q=80&w=1600&auto=format&fit=crop', price:78, id:'crimson-bloom', notes:'Sweet floral with creamy sandalwood base.'}
+      ],
+      unisex:[
+        {title:'Ocean Mist', img:'https://images.unsplash.com/photo-1542831371-d531d36971e6?q=80&w=1600&auto=format&fit=crop', price:76, id:'ocean-mist', notes:'Marine accord with green tea.'},
+        {title:'Green Tea Leaf', img:'https://images.unsplash.com/photo-1533117152671-31f0d7f6b6b1?q=80&w=1600&auto=format&fit=crop', price:68, id:'green-tea-leaf', notes:'Fresh herbal tea with citrus.'},
+        {title:'Amber Sky', img:'https://images.unsplash.com/photo-1516728778615-2d590ea1856f?q=80&w=1600&auto=format&fit=crop', price:82, id:'amber-sky', notes:'Warm amber, vanilla, light spice.'}
+      ]
+    };
+
+    function getParam(name){ const p = new URLSearchParams(window.location.search); return p.get(name); }
+    const id = getParam('id'); const cat = getParam('cat');
+    const flat = [...data.male,...data.female,...data.unisex];
+    let product = flat.find(p=>p.id===id);
+    if (!product && cat) product = (data[cat] && data[cat][0]) || flat[0];
+    if (!product) product = flat[0];
+
+    const imageEl = document.getElementById('productImage'); const metaEl = document.getElementById('productMeta'); const notesEl = document.getElementById('notesText'); const cartCountEl = document.getElementById('cartCount'); const variantsGrid = document.getElementById('variantsGrid');
+
+    imageEl.innerHTML = `<img src="${product.img}" alt="${product.title}" class="img-cover">`;
+    metaEl.innerHTML = `<h1 style="font-size:28px;font-weight:800;margin-bottom:8px">${product.title}</h1>
+      <div class="muted" style="margin-bottom:8px">Premium Concentrate</div>
+      <div style="font-weight:800;font-size:20px;margin-bottom:12px">$${product.price}</div>
+      <p class="muted" style="margin-bottom:18px">Experience our hand-blended notes, crafted with premium ingredients for depth and longevity.</p>
+      <div style="display:flex;gap:10px">
+        <button id="addPerfumeBtn" class="lav-btn">Add to Cart</button>
+        <a href="shop.html" class="px-4 py-3 rounded-md" style="border:1px solid rgba(0,0,0,0.06);display:inline-flex;align-items:center;">Continue shopping</a>
+      </div>`;
+
+    notesEl.textContent = product.notes || 'Fragrance notes not available.';
+
+    function detectCategoryForProduct(prod){
+      if (data.male.find(p=>p.id===prod.id)) return 'male';
+      if (data.female.find(p=>p.id===prod.id)) return 'female';
+      return 'unisex';
+    }
+    const categoryKey = cat || detectCategoryForProduct(product);
+    const variants = (data[categoryKey] || []).filter(p=>p.id !== product.id);
+
+    variantsGrid.innerHTML = '';
+    variants.forEach(v => {
+      const div = document.createElement('div');
+      div.className = 'variant-card';
+      div.innerHTML = `<div style="height:120px;overflow:hidden;border-radius:8px;"><img src="${v.img}" style="width:100%;height:100%;object-fit:cover;border-radius:8px"></div><div style="margin-top:8px;font-weight:700">${v.title}</div><div class="muted">$${v.price}</div>`;
+      div.addEventListener('click', ()=> { window.location.href = window.location.pathname + '?id=' + v.id + '&cat=' + categoryKey; });
+      variantsGrid.appendChild(div);
+    });
+
+    // cart helpers
+    async function ensureSignedInAnonymously(){ if (!auth.currentUser) { try { await auth.signInAnonymously(); } catch(e){ console.error(e); } } }
+    async function getCurrentUid(){ if (!auth.currentUser) await ensureSignedInAnonymously(); return auth.currentUser?auth.currentUser.uid:null; }
+    async function saveCartItem(uid,item){ if(!uid) return null; const r = db.ref(`carts/${uid}`).push(); await r.set(item); return r.key; }
+
+    auth.onAuthStateChanged(async user=>{
+      if (user) { try { const snap = await db.ref(`carts/${user.uid}`).get(); const items = snap.exists()?snap.val():{}; cartCountEl.textContent = String(Object.keys(items).length); } catch(e){ console.error(e); } }
+    });
+
+    document.getElementById('addPerfumeBtn').addEventListener('click', async ()=>{
+      try {
+        await ensureSignedInAnonymously();
+        const uid = auth.currentUser ? auth.currentUser.uid : null;
+        if (!uid) return alert('Unable to get user id');
+        const item = { title: product.title, price: product.price, qty:1, image:product.img, addedAt: firebase.database.ServerValue.TIMESTAMP };
+        await saveCartItem(uid, item);
+        const snap = await db.ref(`carts/${uid}`).get();
+        const items = snap.exists() ? snap.val() : {};
+        cartCountEl.textContent = String(Object.keys(items).length);
+        const t = document.createElement('div'); t.style.cssText='position:fixed;right:18px;bottom:30px;background:linear-gradient(90deg,#9B66FF,#6C2FCC);color:#fff;padding:9px 12px;border-radius:8px;z-index:100;'; t.textContent='Added to cart'; document.body.appendChild(t); setTimeout(()=>t.remove(),1200);
+      } catch(err){ console.error('add to cart failed', err); alert('Failed to add to cart'); }
+    });
+
+    // start anon sign-in
+    ensureSignedInAnonymously();
+  })();
+  </script>
+</body>
+</html>

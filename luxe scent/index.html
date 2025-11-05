@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Luxescent — Signature of Luxury</title>
+
+  <!-- Tailwind (utilities) -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <!-- AOS for subtle animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent1:#C6A9FF; --accent2:#9B66FF; --accent3:#6C2FCC;
+      --bg:#f7f6fb; --panel:#ffffff; --text:#1f1730; --muted:#6B587A; --border:rgba(108,47,204,0.06);
+    }
+
+    /* Reset + base */
+    html,body{height:100%;margin:0;padding:0;box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:var(--bg);color:var(--text);scroll-behavior:smooth}
+    a{color:inherit;text-decoration:none}
+    .muted{color:var(--muted)}
+    .lav-btn{background:linear-gradient(90deg,var(--accent1),var(--accent3));color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+    .logo-mark{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--accent1),var(--accent2));color:#fff;font-weight:800}
+
+    /* layout helpers */
+    .container{max-width:1200px;margin:0 auto;padding-left:18px;padding-right:18px}
+    .card{background:var(--panel);border-radius:12px;box-shadow:0 8px 26px rgba(38,24,58,0.04);overflow:hidden;transition:transform .18s}
+    .card:hover{transform:translateY(-6px)}
+    .img-wrap{height:220px;overflow:hidden}
+    .img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
+    .card:hover .img-wrap img{transform:scale(1.03)}
+
+    /* grid helpers */
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    @media(max-width:1100px){ .grid-4{grid-template-columns:repeat(3,1fr)} }
+    @media(max-width:768px){ .grid-4{grid-template-columns:repeat(2,1fr)} }
+    @media(max-width:420px){ .grid-4{grid-template-columns:repeat(1,1fr)} }
+
+    /* hero */
+    .hero{height:60vh;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 10px 40px rgba(59,43,91,0.06)}
+    .hero img{width:100%;height:100%;object-fit:cover;display:block}
+    .hero-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;padding:2rem;text-align:center;background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.12));}
+    .hero h1{font-weight:800;line-height:1.02;font-size:32px}
+    @media(min-width:900px){ .hero h1{font-size:44px} }
+
+    /* header */
+    .site-header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.98);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);z-index:60}
+    .site-header .inner{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+    /* cart badge */
+    .cart-badge{position:absolute;top:-6px;right:-6px;background:#fff;color:var(--accent3);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+
+    /* cart drawer */
+    .cart-overlay{position:fixed;inset:0;background:rgba(15,12,30,0.45);z-index:80;opacity:0;pointer-events:none;transition:opacity .25s}
+    .cart-overlay.show{opacity:1;pointer-events:auto}
+    .cart-drawer{position:fixed;right:0;top:0;height:100%;width:420px;max-width:96%;background:#fff;box-shadow:-20px 0 40px rgba(21,7,49,0.06);transform:translateX(110%);transition:transform .33s;z-index:90;display:flex;flex-direction:column}
+    .cart-drawer.show{transform:translateX(0)}
+
+    /* detail */
+    .detail-panel{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;z-index:100;pointer-events:none;opacity:0;transition:opacity .2s}
+    .detail-panel.show{pointer-events:auto;opacity:1}
+    .detail-card{width:980px;max-width:98%;background:var(--panel);border-radius:14px;box-shadow:0 30px 80px rgba(21,7,49,0.12);display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px}
+    @media(max-width:900px){ .detail-card{grid-template-columns:1fr;padding:14px} .img-large{height:320px} }
+
+    .img-large{height:420px;border-radius:12px;overflow:hidden}
+    .img-large img{width:100%;height:100%;object-fit:cover}
+
+    /* small toast */
+    .toast{position:fixed;right:18px;bottom:30px;background:linear-gradient(90deg,var(--accent2),var(--accent3));color:#fff;padding:9px 12px;border-radius:8px;z-index:200}
+    .fly-item{position:fixed;z-index:9999;width:80px;height:80px;border-radius:10px;pointer-events:none;transition:transform .9s ease, opacity .9s ease}
+
+    footer{padding:36px 0;text-align:center;color:var(--muted)}
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header" role="banner">
+    <div class="inner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo-mark">L</div>
+        <div>
+          <div style="font-weight:700">Luxescent</div>
+          <div style="font-size:12px;color:var(--muted)">Signature of Luxury</div>
+        </div>
+      </div>
+
+      <nav style="display:flex;align-items:center;gap:14px">
+        <a href="#home" class="muted hidden sm:inline">Home</a>
+        <a href="#shop" id="shopNav" class="muted">Shop</a>
+        <a href="#book" class="muted hidden md:inline">Book</a>
+        <a href="#subscribe" class="muted hidden md:inline">Subscribe</a>
+
+        <!-- cart -->
+        <div id="cartIcon" style="width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent2),var(--accent3));box-shadow:0 6px 20px rgba(108,47,204,0.12);cursor:pointer;position:relative">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 6h12M10 21h.01M17 21h.01" />
+          </svg>
+          <div id="cartCount" class="cart-badge">0</div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main style="padding-top:92px;max-width:1200px;margin:0 auto" class="container">
+
+    <!-- HERO -->
+    <section id="home" class="mb-10" data-aos="fade-up">
+      <div class="hero" >
+        <img src="https://images.unsplash.com/photo-1503342452485-86f2a9b9d3f8?q=80&w=1920&auto=format&fit=crop" alt="Luxescent hero">
+        <div class="hero-inner">
+          <div style="max-width:920px">
+            <h1>ELEVATE YOUR SENSES, ELEVATE YOUR CONFIDENCE</h1>
+            <p style="margin-top:10px;color:rgba(255,255,255,0.92)">Premium fragrances crafted for elegance and character.</p>
+            <div style="margin-top:16px;display:flex;gap:10px;justify-content:center">
+              <button id="heroShopBtn" class="lav-btn">Shop Now</button>
+              <a href="#book" class="px-4 py-2 rounded-md" style="background:#fff;border-radius:10px">Book</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section id="categories" class="mb-10" data-aos="fade-up">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <h3 style="color:var(--accent3);font-weight:800">Shop by Category</h3>
+          <div class="muted">Choose your signature — bold woods, fresh florals, or versatile blends.</div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="cat-btn px-3 py-2 rounded-md border" data-cat="all">All</button>
+          <button class="cat-btn px-3 py-2 rounded-md border" data-cat="male">Male</button>
+          <button class="cat-btn px-3 py-2 rounded-md border" data-cat="female">Female</button>
+          <button class="cat-btn px-3 py-2 rounded-md border" data-cat="unisex">Unisex</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOP GRID -->
+    <section id="shop" class="mb-12" data-aos="fade-up">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <h2 style="font-weight:800">Shop — All Perfumes</h2>
+          <div class="muted">Click a product to view details (same page).</div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center">
+          <input id="searchInput" placeholder="Search products..." style="padding:10px;border-radius:10px;border:1px solid var(--border);background:#fff" />
+          <select id="filterCat" style="padding:10px;border-radius:10px;border:1px solid var(--border);background:#fff">
+            <option value="all">All categories</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="unisex">Unisex</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- products grid — JS will populate -->
+      <div id="productsGrid" class="grid-4" aria-live="polite" ></div>
+
+      <div style="margin-top:20px;display:flex;justify-content:center">
+        <button id="loadMore" class="lav-btn">Load more</button>
+      </div>
+    </section>
+
+    <!-- BOOK FORM -->
+    <section id="book" class="mb-12" data-aos="fade-up">
+      <h3 style="color:var(--accent3);font-weight:800">Book Your Order</h3>
+      <p class="muted">Fill the quick form and our representative will contact you.</p>
+
+      <form id="bookForm" style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <input name="name" placeholder="Full name" required class="p-3 rounded-lg border bg-white" />
+        <input name="email" type="email" placeholder="Email" required class="p-3 rounded-lg border bg-white" />
+        <input name="phone" placeholder="Phone number" required class="p-3 rounded-lg border bg-white" />
+        <select name="category" class="p-3 rounded-lg border bg-white">
+          <option value="">Select Category</option><option value="male">Male</option><option value="female">Female</option><option value="unisex">Unisex</option>
+        </select>
+        <textarea name="message" placeholder="Perfume name / message" class="p-3 rounded-lg border bg-white" style="grid-column:1 / -1"></textarea>
+        <button type="submit" class="lav-btn" style="grid-column:1 / -1">Send Booking</button>
+      </form>
+    </section>
+
+    <!-- SUBSCRIBE -->
+    <section id="subscribe" class="mb-12" data-aos="fade-up">
+      <h3 style="color:var(--accent3);font-weight:800">Stay Updated</h3>
+      <p class="muted">Subscribe for exclusive drops and offers.</p>
+      <form id="subscribeForm" style="margin-top:10px;display:flex;gap:10px;max-width:600px">
+        <input type="email" name="email" placeholder="Enter your email" required class="p-3 rounded-lg border bg-white" />
+        <button class="lav-btn">Subscribe</button>
+      </form>
+    </section>
+
+    <footer>
+      <div style="max-width:1200px;margin:0 auto;padding:24px;text-align:center;color:var(--muted)">
+        <div style="font-weight:700">Luxescent</div>
+        <div style="margin-top:6px">© <span id="year"></span> Luxescent. All rights reserved.</div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- PRODUCT DETAIL PANEL (same-page overlay) -->
+  <div id="detailPanel" class="detail-panel" aria-hidden="true">
+    <div class="detail-card" role="dialog" aria-label="Product detail">
+      <div class="img-large" id="detailImage"><!-- image --></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <h2 id="detailTitle" style="font-size:22px;font-weight:800"></h2>
+            <div class="muted" id="detailCategory" style="margin-top:6px"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="detailCloseBtn" style="background:transparent;border:0;font-size:22px;cursor:pointer">✕</button>
+          </div>
+        </div>
+
+        <div id="detailPrice" style="font-weight:800;font-size:20px"></div>
+        <div id="detailNotes" class="muted"></div>
+
+        <div style="display:flex;gap:10px;align-items:center;margin-top:auto">
+          <button id="detailAddBtn" class="lav-btn">Add to cart</button>
+          <button id="detailViewAll" class="px-4 py-2 rounded-md" style="border:1px solid var(--border)">View collection</button>
+        </div>
+
+        <div>
+          <h4 style="font-weight:700;margin-top:12px">Variants</h4>
+          <div id="detailVariants" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART OVERLAY -->
+  <div id="cartOverlay" class="cart-overlay" aria-hidden="true"></div>
+
+  <!-- CART DRAWER -->
+  <aside id="cartDrawer" class="cart-drawer" aria-hidden="true">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border)">
+      <h3 style="font-weight:800;font-size:18px">Your Cart (<span id="drawerCartCount">0</span>)</h3>
+      <div style="display:flex;gap:8px">
+        <button id="cartClearBtn" title="Clear cart" style="background:transparent;border:0;font-size:18px;cursor:pointer">🗑️</button>
+        <button id="cartCloseBtn" title="Close" style="background:transparent;border:0;font-size:20px;cursor:pointer">✕</button>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:18px">
+      <div id="cartEmptyMsg" class="muted text-center" style="padding:28px 0;display:none">Your cart is empty.</div>
+      <div id="cartItemsContainer" style="display:flex;flex-direction:column;gap:16px"></div>
+    </div>
+
+    <div style="padding:16px;border-top:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong>Total:</strong>
+        <div id="cartTotal" style="font-weight:800">$0.00</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button id="checkoutBtn" class="lav-btn" style="flex:1">Checkout</button>
+        <button id="cartClearBtnMobile" class="px-4 py-2 rounded-md border" style="flex:1">Clear</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <script>
+  (function(){
+    // ====== CONFIG ======
+    // Owner email (as requested) — used for admin checks if you later implement owner login
+    const OWNER_EMAIL = 'zaidgameroffical@gmail.com';
+
+    // Firebase config (provided by you)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0W_5yoSOfXHQdLdVThVvnTZtfYo2ZjEc",
+      authDomain: "client-web-2e353.firebaseapp.com",
+      databaseURL: "https://client-web-2e353-default-rtdb.firebaseio.com/",
+      projectId: "client-web-2e353",
+      storageBucket: "client-web-2e353.firebasestorage.app",
+      messagingSenderId: "368997581275",
+      appId: "1:368997581275:web:b0a8724bea87d7defc27fe",
+      measurementId: "G-SQ2SQE90VE"
+    };
+
+    // Initialize Firebase
+    if (typeof firebase === 'undefined') { console.error('Firebase SDK missing'); return; }
+    try { firebase.initializeApp(firebaseConfig); } catch(e){ /* app already initialized maybe */ }
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // UI refs
+    const productsGrid = document.getElementById('productsGrid');
+    const searchInput = document.getElementById('searchInput');
+    const filterCat = document.getElementById('filterCat');
+    const loadMoreBtn = document.getElementById('loadMore');
+    const cartCountEl = document.getElementById('cartCount');
+    const drawerCartCount = document.getElementById('drawerCartCount');
+    const heroShopBtn = document.getElementById('heroShopBtn');
+    const shopNav = document.getElementById('shopNav');
+
+    const detailPanel = document.getElementById('detailPanel');
+    const detailImage = document.getElementById('detailImage');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailCategory = document.getElementById('detailCategory');
+    const detailPrice = document.getElementById('detailPrice');
+    const detailNotes = document.getElementById('detailNotes');
+    const detailAddBtn = document.getElementById('detailAddBtn');
+    const detailVariants = document.getElementById('detailVariants');
+    const detailCloseBtn = document.getElementById('detailCloseBtn');
+    const detailViewAll = document.getElementById('detailViewAll');
+
+    const cartOverlay = document.getElementById('cartOverlay');
+    const cartDrawer = document.getElementById('cartDrawer');
+    const cartItemsContainer = document.getElementById('cartItemsContainer');
+    const cartEmptyMsg = document.getElementById('cartEmptyMsg');
+    const cartTotalEl = document.getElementById('cartTotal');
+    const cartCloseBtn = document.getElementById('cartCloseBtn');
+    const cartClearBtn = document.getElementById('cartClearBtn');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const cartClearBtnMobile = document.getElementById('cartClearBtnMobile');
+
+    // PRODUCTS list (30+)
+    const PRODUCTS = [
+      /* male */
+      { id:'midnight-steel', title:'Midnight Steel', price:90, cat:'male', img:'https://images.unsplash.com/photo-1541462608141-9b6b2d3b10f7?q=80&w=1400&auto=format&fit=crop', notes:'Bergamot, Incense, Oud.' },
+      { id:'urban-storm', title:'Urban Storm', price:82, cat:'male', img:'https://images.unsplash.com/photo-1547454013-1f1f8e5a3b7f?q=80&w=1400&auto=format&fit=crop', notes:'Fresh green accord, spice.' },
+      { id:'royal-oud', title:'Royal Oud', price:95, cat:'male', img:'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1400&auto=format&fit=crop', notes:'Oud, amber, saffron.' },
+      { id:'amber-knight', title:'Amber Knight', price:105, cat:'male', img:'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?q=80&w=1400&auto=format&fit=crop', notes:'Warm amber, spice.' },
+      { id:'iron-cedar', title:'Iron Cedar', price:88, cat:'male', img:'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=1400&auto=format&fit=crop', notes:'Cedar, vetiver.' },
+      { id:'smoky-noir', title:'Smoky Noir', price:92, cat:'male', img:'https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1400&auto=format&fit=crop', notes:'Smoked woods, leather.' },
+      { id:'midnight-leather', title:'Midnight Leather', price:110, cat:'male', img:'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1400&auto=format&fit=crop', notes:'Leather, dark woods.' },
+      { id:'cobalt-spice', title:'Cobalt Spice', price:78, cat:'male', img:'https://images.unsplash.com/photo-1516822003754-cca485356ecb?q=80&w=1400&auto=format&fit=crop', notes:'Spicy citrus.' },
+      { id:'noir-velvet', title:'Noir Velvet', price:99, cat:'male', img:'https://images.unsplash.com/photo-1532634896-26909d0d7b4f?q=80&w=1400&auto=format&fit=crop', notes:'Vanilla, amber, musk.' },
+      { id:'tobacco-royal', title:'Tobacco Royal', price:115, cat:'male', img:'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1400&auto=format&fit=crop', notes:'Tobacco leaf, honey.' },
+      { id:'cedar-echo', title:'Cedar Echo', price:85, cat:'male', img:'https://images.unsplash.com/photo-1490818387583-1baba5e638af?q=80&w=1400&auto=format&fit=crop', notes:'Cedar, smoky base.' },
+
+      /* female */
+      { id:'velvet-rose', title:'Velvet Rose', price:88, cat:'female', img:'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1400&auto=format&fit=crop', notes:'Rose, peony, musk.' },
+      { id:'blossom-day', title:'Blossom Day', price:70, cat:'female', img:'https://images.unsplash.com/photo-1546328130-6b0b7b4d8b24?q=80&w=1400&auto=format&fit=crop', notes:'Citrus, jasmine.' },
+      { id:'crimson-bloom', title:'Crimson Bloom', price:78, cat:'female', img:'https://images.unsplash.com/photo-1513709630908-9f6f8e3a4eac?q=80&w=1400&auto=format&fit=crop', notes:'Floral, sandalwood.' },
+      { id:'pearl-dawn', title:'Pearl Dawn', price:95, cat:'female', img:'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?q=80&w=1400&auto=format&fit=crop', notes:'Soft floral, amber.' },
+      { id:'silk-musk', title:'Silk Musk', price:84, cat:'female', img:'https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?q=80&w=1400&auto=format&fit=crop', notes:'Musk, clean vanilla.' },
+      { id:'lily-ombre', title:'Lily Ombre', price:72, cat:'female', img:'https://images.unsplash.com/photo-1526129632109-5bedf0a9f5b3?q=80&w=1400&auto=format&fit=crop', notes:'Lily, green accord.' },
+      { id:'dawn-nectar', title:'Dawn Nectar', price:89, cat:'female', img:'https://images.unsplash.com/photo-1505577058444-a3dab1b5d1c9?q=80&w=1400&auto=format&fit=crop', notes:'Fruity floral.' },
+      { id:'amber-rose', title:'Amber Rose', price:98, cat:'female', img:'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1400&auto=format&fit=crop', notes:'Rose, amber.' },
+      { id:'peach-satin', title:'Peach Satin', price:68, cat:'female', img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1400&auto=format&fit=crop', notes:'Peach, soft musk.' },
+      { id:'vanilla-bloom', title:'Vanilla Bloom', price:76, cat:'female', img:'https://images.unsplash.com/photo-1506619216599-9d16efb9f7aa?q=80&w=1400&auto=format&fit=crop', notes:'Vanilla floral.' },
+      { id:'jasmine-glow', title:'Jasmine Glow', price:81, cat:'female', img:'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1400&auto=format&fit=crop', notes:'Jasmine, honey.' },
+
+      /* unisex */
+      { id:'ocean-mist', title:'Ocean Mist', price:76, cat:'unisex', img:'https://images.unsplash.com/photo-1542831371-d531d36971e6?q=80&w=1400&auto=format&fit=crop', notes:'Marine accord, green tea.' },
+      { id:'green-tea-leaf', title:'Green Tea Leaf', price:68, cat:'unisex', img:'https://images.unsplash.com/photo-1533117152671-31f0d7f6b6b1?q=80&w=1400&auto=format&fit=crop', notes:'Herbal, citrus.' },
+      { id:'amber-sky', title:'Amber Sky', price:82, cat:'unisex', img:'https://images.unsplash.com/photo-1516728778615-2d590ea1856f?q=80&w=1400&auto=format&fit=crop', notes:'Amber, vanilla.' },
+      { id:'citrus-surge', title:'Citrus Surge', price:65, cat:'unisex', img:'https://images.unsplash.com/photo-1509460913899-1f2f0eb2f3a2?q=80&w=1400&auto=format&fit=crop', notes:'Bright citrus.' },
+      { id:'mint-accord', title:'Mint Accord', price:59, cat:'unisex', img:'https://images.unsplash.com/photo-1472664039839-1b6c5d9b6b58?q=80&w=1400&auto=format&fit=crop', notes:'Mint, freshness.' },
+      { id:'sage-wind', title:'Sage Wind', price:74, cat:'unisex', img:'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1400&auto=format&fit=crop', notes:'Sage, woody base.' },
+      { id:'cedar-breeze', title:'Cedar Breeze', price:79, cat:'unisex', img:'https://images.unsplash.com/photo-1490818387583-1baba5e638af?q=80&w=1400&auto=format&fit=crop', notes:'Cedar, airy.' },
+      { id:'salted-amber', title:'Salted Amber', price:86, cat:'unisex', img:'https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?q=80&w=1400&auto=format&fit=crop', notes:'Amber, sea salt.' },
+      { id:'tea-orchard', title:'Tea Orchard', price:69, cat:'unisex', img:'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1400&auto=format&fit=crop', notes:'Green tea, orchard fruit.' },
+      { id:'evening-mist', title:'Evening Mist', price:73, cat:'unisex', img:'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?q=80&w=1400&auto=format&fit=crop', notes:'Soft florals, musk.' }
+    ];
+
+    // state
+    let renderedCount = 12;
+    const perLoad = 8;
+
+    // helpers
+    function productCardHTML(p){
+      return `
+        <div class="card" data-id="${p.id}" data-cat="${p.cat}">
+          <div class="img-wrap"><img src="${p.img}" alt="${p.title}"></div>
+          <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:800">${p.title}</div>
+              <div style="font-weight:800;color:var(--accent3)">$${p.price}</div>
+            </div>
+            <div class="muted" style="font-size:13px">Category: ${p.cat}</div>
+            <div style="margin-top:auto;display:flex;gap:8px;align-items:center">
+              <button class="lav-btn add-btn" data-id="${p.id}">Add</button>
+              <button class="px-3 py-2 rounded-md view-btn" data-id="${p.id}" style="border:1px solid var(--border);background:#fff">View</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProducts(count){
+      productsGrid.innerHTML = '';
+      const q = (searchInput.value || '').trim().toLowerCase();
+      const catFilter = filterCat.value || 'all';
+
+      let filtered = PRODUCTS.filter(p=>{
+        if (catFilter !== 'all' && p.cat !== catFilter) return false;
+        if (q && !(p.title.toLowerCase().includes(q) || p.cat.includes(q))) return false;
+        return true;
+      });
+
+      // If All & no search -> show only 3 items
+      if (catFilter === 'all' && q === '') {
+        filtered = filtered.slice(0, 3);
+        loadMoreBtn.style.display = 'none';
+      } else {
+        loadMoreBtn.style.display = filtered.length > count ? 'inline-flex' : 'none';
+      }
+
+      const toRender = filtered.slice(0, count);
+      toRender.forEach(p => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = productCardHTML(p);
+        productsGrid.appendChild(wrapper.firstElementChild);
+      });
+
+      if (typeof AOS !== 'undefined') AOS.refresh();
+    }
+
+    // initial render
+    renderProducts(renderedCount);
+
+    // events
+    loadMoreBtn.addEventListener('click', ()=> { renderedCount += perLoad; renderProducts(renderedCount); });
+    searchInput.addEventListener('input', ()=> renderProducts(renderedCount));
+    filterCat.addEventListener('change', ()=> { renderedCount = 12; renderProducts(renderedCount); });
+
+    document.querySelectorAll('.cat-btn').forEach(btn => btn.addEventListener('click', (e)=> {
+      document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      filterCat.value = btn.dataset.cat || 'all';
+      renderedCount = 12;
+      renderProducts(renderedCount);
+      document.getElementById('shop').scrollIntoView({behavior:'smooth', block:'start'});
+    }));
+
+    heroShopBtn && heroShopBtn.addEventListener('click', ()=> document.getElementById('shop').scrollIntoView({behavior:'smooth'}));
+    shopNav && shopNav.addEventListener('click', (e)=> { e.preventDefault(); document.getElementById('shop').scrollIntoView({behavior:'smooth'}); });
+
+    function showToast(msg='Done'){
+      const t = document.createElement('div'); t.className='toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(()=> t.remove(), 1400);
+    }
+
+    // Firebase helpers (v8)
+    async function ensureSignedInAnonymously(){
+      if (!auth.currentUser) {
+        try { await auth.signInAnonymously(); } catch(e){ console.error('anon sign-in', e); }
+      }
+    }
+    async function getCurrentUid(){ if (!auth.currentUser) await ensureSignedInAnonymously(); return auth.currentUser ? auth.currentUser.uid : null; }
+    async function saveCartItemToDb(uid, item){
+      if (!uid) return null;
+      const ref = db.ref(`carts/${uid}`).push();
+      await ref.set(item);
+      return ref.key;
+    }
+    async function saveOrderToDb(payload){
+      const ref = db.ref('orders').push();
+      await ref.set(payload);
+      return ref.key;
+    }
+
+    // sync cart count
+    async function syncCartCount(){
+      try {
+        const uid = await getCurrentUid();
+        if (!uid) {
+          const arr = JSON.parse(localStorage.getItem('local_cart_items_v1')||'[]');
+          cartCountEl.textContent = String(arr.length);
+          if (drawerCartCount) drawerCartCount.textContent = String(arr.length);
+          return;
+        }
+        const snap = await db.ref(`carts/${uid}`).once('value');
+        const items = snap.val() || {};
+        const n = Object.keys(items).length;
+        cartCountEl.textContent = String(n);
+        if (drawerCartCount) drawerCartCount.textContent = String(n);
+      } catch(e){ console.error('syncCartCount err', e); }
+    }
+    ensureSignedInAnonymously().then(syncCartCount).catch(()=>{});
+
+    // fly add + add to cart
+    document.body.addEventListener('click', async (e)=>{
+      const addBtn = e.target.closest('.add-btn');
+      const viewBtn = e.target.closest('.view-btn');
+      if (!addBtn && !viewBtn) return;
+
+      if (viewBtn) {
+        const pid = viewBtn.dataset.id;
+        openProductDetail(pid);
+        return;
+      }
+
+      const pid = addBtn.dataset.id;
+      const prod = PRODUCTS.find(p=>p.id === pid);
+      if (!prod) return;
+
+      try {
+        const rect = addBtn.getBoundingClientRect();
+        const fly = document.createElement('div');
+        fly.className = 'fly-item';
+        fly.style.left = rect.left + 'px';
+        fly.style.top = rect.top + 'px';
+        fly.style.width = '64px';
+        fly.style.height = '64px';
+        fly.style.backgroundImage = `url(${prod.img})`;
+        fly.style.backgroundSize = 'cover';
+        fly.style.borderRadius = '8px';
+        document.body.appendChild(fly);
+        const cartRect = document.getElementById('cartIcon').getBoundingClientRect();
+        requestAnimationFrame(()=> {
+          fly.style.transform = `translate(${cartRect.left - rect.left}px, ${cartRect.top - rect.top}px) scale(.12)`;
+          fly.style.opacity = '0';
+        });
+        setTimeout(()=> fly.remove(), 800);
+      } catch(e){ /* ignore */ }
+
+      try {
+        await ensureSignedInAnonymously();
+        const uid = auth.currentUser ? auth.currentUser.uid : null;
+        const item = { title: prod.title, price: prod.price, qty:1, image: prod.img, addedAt: firebase.database.ServerValue.TIMESTAMP };
+        if (uid) await saveCartItemToDb(uid, item);
+        else {
+          const arr = JSON.parse(localStorage.getItem('local_cart_items_v1')||'[]'); arr.push(item); localStorage.setItem('local_cart_items_v1', JSON.stringify(arr));
+        }
+        await syncCartCount();
+        showToast('Added to cart');
+      } catch(err){ console.error('add to cart err', err); alert('Failed to add to cart'); }
+    });
+
+    // product detail
+    let currentDetailProduct = null;
+    function openProductDetail(pid){
+      const prod = PRODUCTS.find(p=>p.id === pid);
+      if (!prod) return;
+      currentDetailProduct = prod;
+      detailImage.innerHTML = `<img src="${prod.img}" alt="${prod.title}" style="width:100%;height:100%;object-fit:cover;">`;
+      detailTitle.textContent = prod.title;
+      detailCategory.textContent = prod.cat.charAt(0).toUpperCase() + prod.cat.slice(1);
+      detailPrice.textContent = '$' + prod.price;
+      detailNotes.textContent = prod.notes || '';
+      detailVariants.innerHTML = '';
+
+      PRODUCTS.filter(p=>p.cat === prod.cat && p.id !== prod.id).slice(0,6).forEach(v=>{
+        const b = document.createElement('button');
+        b.className = 'card';
+        b.style.padding = '8px';
+        b.style.minWidth = '120px';
+        b.innerHTML = `<div style="height:80px;overflow:hidden;border-radius:8px"><img src="${v.img}" style="width:100%;height:100%;object-fit:cover"></div><div style="font-weight:700;margin-top:8px">${v.title}</div><div class="muted">$${v.price}</div>`;
+        b.addEventListener('click', ()=> openProductDetail(v.id));
+        detailVariants.appendChild(b);
+      });
+
+      detailViewAll.onclick = ()=> {
+        filterCat.value = prod.cat;
+        renderedCount = 12;
+        renderProducts(renderedCount);
+        detailPanel.classList.remove('show');
+        document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+      };
+
+      detailAddBtn.onclick = async ()=>{
+        try {
+          await ensureSignedInAnonymously();
+          const uid = auth.currentUser ? auth.currentUser.uid : null;
+          const item = { title: prod.title, price: prod.price, qty:1, image: prod.img, addedAt: firebase.database.ServerValue.TIMESTAMP };
+          if (uid) await saveCartItemToDb(uid, item);
+          else {
+            const arr = JSON.parse(localStorage.getItem('local_cart_items_v1')||'[]'); arr.push(item); localStorage.setItem('local_cart_items_v1', JSON.stringify(arr));
+          }
+          await syncCartCount();
+          showToast('Added to cart');
+        } catch(err){ console.error('detail add err', err); alert('Failed to add to cart'); }
+      };
+
+      detailPanel.classList.add('show');
+    }
+
+    detailCloseBtn.addEventListener('click', ()=> detailPanel.classList.remove('show'));
+    detailPanel.addEventListener('click', (e)=> { if (e.target === detailPanel) detailPanel.classList.remove('show'); });
+
+    // CART drawer
+    (function(){
+      let cartRef = null, cartListener = null;
+
+      function formatCurrency(n){ return '$' + (Number(n) || 0).toFixed(2); }
+
+      function renderCartItems(itemsObj){
+        cartItemsContainer.innerHTML = '';
+        const keys = itemsObj ? Object.keys(itemsObj) : [];
+        if (!keys.length) { cartEmptyMsg.style.display = 'block'; cartTotalEl.textContent = formatCurrency(0); drawerCartCount.textContent = '0'; return; }
+        cartEmptyMsg.style.display = 'none';
+        let total = 0;
+        keys.forEach(k=>{
+          const it = itemsObj[k]; const price = Number(it.price || 0); const qty = Number(it.qty || 1); total += price * qty;
+          const div = document.createElement('div'); div.className = 'cart-item';
+          div.style.display = 'flex'; div.style.gap = '12px'; div.style.alignItems='center'; div.style.padding='10px'; div.style.borderRadius='10px'; div.style.background='#fff';
+          div.innerHTML = `<img src="${it.image||'https://via.placeholder.com/120'}" style="width:72px;height:72px;object-fit:cover;border-radius:8px"><div style="flex:1"><h4 style="margin:0">${it.title||'Product'}</h4><div class="muted">${formatCurrency(price)}</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+              <div style="display:flex;gap:6px;align-items:center"><button class="dec">−</button><span style="padding:0 8px">${qty}</span><button class="inc">＋</button></div>
+              <button class="remove" style="background:transparent;border:0;color:var(--muted);cursor:pointer">Remove</button>
+            </div>`;
+          const dec = div.querySelector('.dec'), inc = div.querySelector('.inc'), rem = div.querySelector('.remove'), qtySpan = div.querySelector('span');
+          dec.onclick = async ()=> { const newQty = Math.max(1, Number(qtySpan.textContent) - 1); qtySpan.textContent = newQty; await updateQty(k, newQty); };
+          inc.onclick = async ()=> { const newQty = Number(qtySpan.textContent) + 1; qtySpan.textContent = newQty; await updateQty(k, newQty); };
+          rem.onclick = async ()=> { if (!confirm('Remove this item?')) return; await removeItem(k); };
+          cartItemsContainer.appendChild(div);
+        });
+        drawerCartCount.textContent = keys.length;
+        cartTotalEl.textContent = formatCurrency(total);
+      }
+
+      async function startListeningCart(uid){
+        try {
+          if (cartListener && cartRef) { cartRef.off('value', cartListener); cartListener = null; cartRef = null; }
+          if (!uid) return;
+          cartRef = db.ref(`carts/${uid}`);
+          cartListener = cartRef.on('value', snap => {
+            const val = snap.exists() ? snap.val() : {};
+            renderCartItems(val);
+            try { cartCountEl.textContent = Object.keys(val).length; drawerCartCount.textContent = Object.keys(val).length; } catch(e){}
+          });
+        } catch(e){ console.error('startListeningCart err', e); }
+      }
+
+      async function updateQty(key, qty){
+        try {
+          const uid = auth.currentUser ? auth.currentUser.uid : await getCurrentUid();
+          if (!uid) return;
+          if (qty <= 0) await db.ref(`carts/${uid}/${key}`).remove();
+          else await db.ref(`carts/${uid}/${key}`).update({ qty });
+        } catch(e){ console.error('updateQty err', e); }
+      }
+
+      async function removeItem(key){
+        try {
+          const uid = auth.currentUser ? auth.currentUser.uid : await getCurrentUid();
+          if (!uid) return;
+          await db.ref(`carts/${uid}/${key}`).remove();
+        } catch(e){ console.error('removeItem err', e); }
+      }
+
+      async function clearCart(){
+        try {
+          const uid = auth.currentUser ? auth.currentUser.uid : await getCurrentUid();
+          if (!uid) return;
+          await db.ref(`carts/${uid}`).remove();
+          await syncCartCount();
+        } catch(e){ console.error('clearCart err', e); }
+      }
+
+      async function saveCheckout(){
+        try {
+          const uid = auth.currentUser ? auth.currentUser.uid : await getCurrentUid();
+          if (!uid) return alert('No user id available');
+          const snap = await db.ref(`carts/${uid}`).once('value');
+          const itemsObj = snap.exists() ? snap.val() : null;
+          if (!itemsObj) return alert('Cart is empty');
+          const items = Object.keys(itemsObj).map(k => ({ key:k, ...itemsObj[k] }));
+          const total = items.reduce((s,i) => s + (i.price * i.qty), 0);
+          const payload = { uid, items, total, createdAt: firebase.database.ServerValue.TIMESTAMP, note: 'Checkout via site' };
+          const key = await saveOrderToDb(payload);
+          await clearCart();
+          alert('Order saved! ID: ' + key);
+          cartOverlay.classList.remove('show'); cartDrawer.classList.remove('show');
+          await syncCartCount();
+        } catch(err){ console.error('saveCheckout err', err); alert('Checkout failed'); }
+      }
+
+      // open drawer when cart icon clicked
+      document.getElementById('cartIcon').addEventListener('click', async ()=>{
+        try {
+          await ensureSignedInAnonymously();
+          const uid = auth.currentUser ? auth.currentUser.uid : await getCurrentUid();
+          await startListeningCart(uid);
+          cartOverlay.classList.add('show'); cartDrawer.classList.add('show'); document.body.style.overflow = 'hidden';
+        } catch(e){ console.error(e); }
+      });
+
+      cartCloseBtn.addEventListener('click', ()=> { cartOverlay.classList.remove('show'); cartDrawer.classList.remove('show'); document.body.style.overflow = ''; });
+      cartOverlay.addEventListener('click', ()=> { cartOverlay.classList.remove('show'); cartDrawer.classList.remove('show'); document.body.style.overflow = ''; });
+      cartClearBtn.addEventListener('click', async ()=> { if (!confirm('Clear entire cart?')) return; await clearCart(); });
+      cartClearBtnMobile && cartClearBtnMobile.addEventListener('click', async ()=> { if (!confirm('Clear entire cart?')) return; await clearCart(); });
+      checkoutBtn.addEventListener('click', saveCheckout);
+
+      window.addEventListener('beforeunload', ()=> { if (cartRef && cartListener) cartRef.off('value', cartListener); });
+    })();
+
+    // Forms
+    const bookForm = document.getElementById('bookForm');
+    if (bookForm) bookForm.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const f = e.target;
+      const payload = { name: f.name?.value||'', email: f.email?.value||'', phone: f.phone?.value||'', category: f.category?.value||'', message: f.message?.value||'', createdAt: firebase.database.ServerValue.TIMESTAMP };
+      try {
+        const uid = await getCurrentUid();
+        payload.uid = uid;
+        await saveOrderToDb(payload);
+        alert('Booking saved. Thank you!');
+        f.reset();
+      } catch(err){ console.error('booking err', err); alert('Booking failed'); }
+    });
+
+    const subscribeForm = document.getElementById('subscribeForm');
+    if (subscribeForm) subscribeForm.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = this.email?.value || '';
+      try {
+        const uid = await getCurrentUid();
+        await db.ref('subscriptions').push().set({ email, uid, createdAt: firebase.database.ServerValue.TIMESTAMP });
+        alert('Subscribed. Thank you!');
+        this.reset();
+      } catch(err){ console.error('subscribe err', err); alert('Subscribe failed'); }
+    });
+
+    // Auth state
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        try {
+          const snap = await db.ref(`carts/${user.uid}`).once('value');
+          const items = snap.val() || {};
+          cartCountEl.textContent = String(Object.keys(items).length);
+          if (drawerCartCount) drawerCartCount.textContent = String(Object.keys(items).length);
+        } catch(e){ console.error(e); }
+      } else {
+        const arr = JSON.parse(localStorage.getItem('local_cart_items_v1')||'[]');
+        cartCountEl.textContent = String(arr.length);
+        if (drawerCartCount) drawerCartCount.textContent = String(arr.length);
+      }
+    });
+
+    // expose helpers
+    window.syncCartCount = syncCartCount;
+    window.openProductDetail = openProductDetail;
+
+    // set year
+    try { document.getElementById('year').textContent = new Date().getFullYear(); } catch(e){}
+
+    if (typeof AOS !== 'undefined') AOS.init({ duration:650, once:true });
+  })();
+  </script>
+
+</body>
+</html>
